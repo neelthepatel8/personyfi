@@ -62,6 +62,17 @@ def _check_env(config: Config, result: DoctorResult) -> None:
     except Exception as exc:
         result.add(False, f"teller auth invalid: {exc}")
 
+    if config.llm_enabled:
+        result.add(bool(config.openai_api_key), "OPENAI_API_KEY set (LLM enabled)")
+        try:
+            import openai  # noqa: F401
+
+            result.add(True, "openai package installed")
+        except Exception as exc:
+            result.add(False, f"openai package missing: {exc}")
+    else:
+        result.add(True, "LLM disabled (set FINANCE_LLM_ENABLED=true to enable)")
+
 
 def _print_and_exit(result: DoctorResult) -> int:
     for message in result.messages:

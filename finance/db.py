@@ -119,6 +119,9 @@ def init_db(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_rules_priority ON rules(priority);
         """
     )
+    _ensure_column(conn, "transactions", "flow_type", "TEXT")
+    _ensure_column(conn, "transactions", "category_source", "TEXT")
+    _ensure_column(conn, "transactions", "category_confidence", "REAL")
     conn.commit()
 
 
@@ -245,9 +248,10 @@ def upsert_transactions(conn: sqlite3.Connection, item_id: str, transactions: It
             INSERT INTO transactions (
                 transaction_id, item_id, account_id, name, merchant_name, amount, iso_currency_code,
                 date, authorized_date, pending, pending_transaction_id, category_id, category,
+                flow_type, category_source, category_confidence,
                 removed, removed_at, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?, ?)
             ON CONFLICT(transaction_id) DO UPDATE SET
                 item_id=excluded.item_id,
                 account_id=excluded.account_id,
@@ -259,8 +263,26 @@ def upsert_transactions(conn: sqlite3.Connection, item_id: str, transactions: It
                 authorized_date=excluded.authorized_date,
                 pending=excluded.pending,
                 pending_transaction_id=excluded.pending_transaction_id,
-                category_id=excluded.category_id,
-                category=excluded.category,
+                category_id=CASE
+                    WHEN transactions.category_source IN ('rule', 'llm') THEN transactions.category_id
+                    ELSE excluded.category_id
+                END,
+                category=CASE
+                    WHEN transactions.category_source IN ('rule', 'llm') THEN transactions.category
+                    ELSE excluded.category
+                END,
+                flow_type=CASE
+                    WHEN transactions.category_source IN ('rule', 'llm') THEN transactions.flow_type
+                    ELSE excluded.flow_type
+                END,
+                category_source=CASE
+                    WHEN transactions.category_source IN ('rule', 'llm') THEN transactions.category_source
+                    ELSE excluded.category_source
+                END,
+                category_confidence=CASE
+                    WHEN transactions.category_source IN ('rule', 'llm') THEN transactions.category_confidence
+                    ELSE excluded.category_confidence
+                END,
                 removed=0,
                 removed_at=NULL,
                 updated_at=excluded.updated_at
@@ -279,6 +301,9 @@ def upsert_transactions(conn: sqlite3.Connection, item_id: str, transactions: It
                 transaction.get("pending_transaction_id"),
                 transaction.get("category_id"),
                 _serialize_category(transaction.get("category")),
+                transaction.get("flow_type"),
+                transaction.get("category_source"),
+                transaction.get("category_confidence"),
                 now,
                 now,
             ),
@@ -421,3 +446,10 @@ def _serialize_category(category: object | None) -> str | None:
     if isinstance(category, list):
         return ",".join([str(entry) for entry in category])
     return str(category)
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, ddl: str) -> None:
+    columns = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column in columns:
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")

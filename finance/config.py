@@ -10,6 +10,10 @@ class Config:
     teller_token: str | None
     teller_cert_path: str | None
     teller_key_path: str | None
+    openai_api_key: str | None
+    llm_enabled: bool
+    llm_model: str
+    llm_max_batch: int
     api_host: str
     api_port: int
     ingest_interval_minutes: int
@@ -23,6 +27,10 @@ def load_config() -> Config:
     teller_token = os.getenv("TELLER_TOKEN")
     teller_cert_path = _normalize_path(os.getenv("TELLER_CERT_PATH"))
     teller_key_path = _normalize_path(os.getenv("TELLER_KEY_PATH"))
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    llm_enabled = _parse_bool(os.getenv("FINANCE_LLM_ENABLED"))
+    llm_model = os.getenv("FINANCE_LLM_MODEL", "gpt-4o-mini")
+    llm_max_batch = _parse_int("FINANCE_LLM_MAX_BATCH", 25)
     api_host = os.getenv("FINANCE_API_HOST", "127.0.0.1")
     api_port = _parse_int("FINANCE_API_PORT", 3030)
     ingest_interval_minutes = _parse_int("FINANCE_INGEST_INTERVAL_MINUTES", 10)
@@ -35,6 +43,10 @@ def load_config() -> Config:
         teller_token=teller_token,
         teller_cert_path=teller_cert_path,
         teller_key_path=teller_key_path,
+        openai_api_key=openai_api_key,
+        llm_enabled=llm_enabled,
+        llm_model=llm_model,
+        llm_max_batch=llm_max_batch,
         api_host=api_host,
         api_port=api_port,
         ingest_interval_minutes=ingest_interval_minutes,
@@ -63,3 +75,9 @@ def _parse_int(name: str, default: int) -> int:
         return int(raw)
     except ValueError as exc:
         raise ValueError(f"{name} must be an integer") from exc
+
+
+def _parse_bool(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}

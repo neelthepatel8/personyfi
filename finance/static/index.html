@@ -6,14 +6,7 @@
   <title>Finance OS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Context7 (shoelace-style/shoelace): CDN autoloader usage.
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-  -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Context7 (apache/echarts-doc): include echarts.min.js and init with echarts.init(...);
   calendar heatmap uses calendar + heatmap series with coordinateSystem: 'calendar'.
@@ -22,80 +15,110 @@
 
   <style>
     :root {
-      --bg: #f7f1ea;
-      --bg-2: #eef4f1;
-      --ink: #1a1917;
-      --muted: #6a645c;
-      --accent: #1f5d50;
-      --accent-2: #c45d3c;
-      --accent-3: #e0b247;
-      --card: #ffffff;
-      --border: rgba(27, 25, 23, 0.12);
-      --shadow: 0 14px 30px rgba(25, 18, 8, 0.1);
-      --radius: 18px;
+      --bg: #f5f7fb;
+      --bg-2: #e8f1ff;
+      --ink: #0f172a;
+      --muted: #5f6b7a;
+      --surface: #ffffff;
+      --accent: #0ea5a6;
+      --accent-2: #ff7a59;
+      --accent-3: #2563eb;
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+      --radius: 20px;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Sora", sans-serif;
+      font-family: "Space Grotesk", sans-serif;
       color: var(--ink);
-      background: radial-gradient(circle at top left, #f6dfc4 0%, transparent 35%),
-        radial-gradient(circle at 80% 0%, #d7e6dc 0%, transparent 40%),
-        linear-gradient(135deg, var(--bg), var(--bg-2));
+      background: linear-gradient(140deg, var(--bg) 0%, var(--bg-2) 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    header {
-      padding: 48px 20px 24px;
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      z-index: -1;
+    }
+
+    body::before {
+      top: -160px;
+      left: -120px;
+      background: rgba(14, 165, 166, 0.6);
+    }
+
+    body::after {
+      top: 60px;
+      right: -160px;
+      background: rgba(37, 99, 235, 0.5);
     }
 
     .wrap {
-      max-width: 1200px;
+      max-width: 1220px;
       margin: 0 auto;
-      padding: 0 20px 60px;
+      padding: 0 22px 60px;
+    }
+
+    header {
+      padding: 48px 0 24px;
     }
 
     .hero {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
       gap: 18px;
     }
 
     .title {
-      font-family: "Fraunces", serif;
       font-size: 36px;
-      margin: 0;
-      letter-spacing: 0.4px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      letter-spacing: -0.4px;
     }
 
     .subtitle {
       margin: 0;
       color: var(--muted);
-      max-width: 640px;
+      max-width: 560px;
       line-height: 1.5;
+      font-size: 15px;
     }
 
-    .status-grid {
+    .status-grid,
+    .totals-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
     }
 
     .stat-card {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
+      border-radius: 16px;
+      padding: 14px 16px;
       box-shadow: var(--shadow);
+      animation: rise 0.5s ease both;
     }
 
     .stat-card h3 {
       margin: 0 0 6px;
-      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      font-size: 11px;
+      letter-spacing: 1.1px;
       color: var(--muted);
     }
 
@@ -105,10 +128,10 @@
     }
 
     .panel {
-      background: var(--card);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 16px;
+      padding: 18px;
       box-shadow: var(--shadow);
     }
 
@@ -116,49 +139,134 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .panel-title {
-      font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-size: 12px;
       color: var(--muted);
       margin: 0;
     }
 
-    .controls {
+    .toolbar {
+      margin: 20px 0;
       display: grid;
       gap: 16px;
-      margin: 24px 0;
     }
 
-    .control-grid {
+    .toolbar-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px;
     }
 
-    .control-actions {
+    .field label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .toolbar-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #f8fafc;
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip.active {
+      background: rgba(37, 99, 235, 0.12);
+      border-color: rgba(37, 99, 235, 0.3);
+      color: var(--accent-3);
+    }
+
+    .btn {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn.primary {
+      background: var(--accent-3);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn.secondary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(14, 165, 166, 0.3);
+    }
+
+    .btn.outline {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn.accent {
+      background: var(--accent-2);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(255, 122, 89, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
     .status-line {
-      color: var(--muted);
       font-size: 13px;
-      margin-top: 6px;
+      color: var(--muted);
     }
 
-    .insights-grid {
+    .grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       gap: 16px;
     }
 
-    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
     .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
     .span-8 { grid-column: span 8; }
     .span-12 { grid-column: span 12; }
 
@@ -171,7 +279,7 @@
 
     .micro-grid {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .micro-stat {
@@ -179,8 +287,8 @@
       justify-content: space-between;
       padding: 10px 12px;
       border-radius: 12px;
-      background: #f4efe8;
-      border: 1px solid rgba(28, 24, 18, 0.08);
+      background: rgba(37, 99, 235, 0.06);
+      border: 1px solid rgba(37, 99, 235, 0.12);
       font-size: 14px;
     }
 
@@ -189,7 +297,7 @@
       padding: 0;
       list-style: none;
       display: grid;
-      gap: 8px;
+      gap: 10px;
     }
 
     .merchants-list li {
@@ -197,7 +305,7 @@
       justify-content: space-between;
       font-size: 14px;
       padding-bottom: 6px;
-      border-bottom: 1px dashed rgba(27, 25, 23, 0.1);
+      border-bottom: 1px dashed rgba(15, 23, 42, 0.1);
     }
 
     .rules-list {
@@ -213,11 +321,35 @@
       align-items: center;
       padding: 6px 10px;
       border-radius: 999px;
-      background: #f0f5f2;
+      background: rgba(14, 165, 166, 0.12);
       color: var(--accent);
-      border: 1px solid rgba(31, 93, 80, 0.2);
+      border: 1px solid rgba(14, 165, 166, 0.25);
       font-size: 12px;
       letter-spacing: 0.4px;
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .rules-grid input,
+    .rules-grid select {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .rules-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
     }
 
     .transactions {
@@ -239,9 +371,9 @@
     th {
       text-transform: uppercase;
       letter-spacing: 0.9px;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
-      background: #f4efe8;
+      background: rgba(15, 23, 42, 0.04);
     }
 
     td.amount {
@@ -250,33 +382,44 @@
       font-weight: 600;
     }
 
-    .amount.negative { color: #b6462c; }
-    .amount.positive { color: #1f5d50; }
+    .amount.negative { color: #d14a36; }
+    .amount.positive { color: #1e9e89; }
+
+    .pill {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 122, 89, 0.12);
+      color: var(--accent-2);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
 
     .mini-btn {
       border: none;
       background: transparent;
-      color: var(--accent);
+      color: var(--accent-3);
       cursor: pointer;
       font-size: 12px;
+      margin-left: 6px;
     }
 
-    sl-button::part(base) {
-      border-radius: 999px;
-      font-weight: 600;
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    sl-input::part(base),
-    sl-select::part(base) {
-      border-radius: 12px;
+    @media (max-width: 960px) {
+      .span-5, .span-6, .span-7, .span-8 { grid-column: span 12; }
+      .chart, .chart.tall { height: 280px; }
     }
 
-    @media (max-width: 900px) {
-      .span-4, .span-6, .span-8 { grid-column: span 12; }
-      .chart, .chart.tall { height: 300px; }
-    }
-
-    @media (max-width: 700px) {
+    @media (max-width: 720px) {
+      .toolbar-actions {
+        flex-direction: column;
+        align-items: flex-start;
+      }
       table, thead, tbody, th, td, tr {
         display: block;
       }
@@ -302,38 +445,63 @@
   </style>
 </head>
 <body>
-  <header class="wrap hero">
-    <div>
-      <h1 class="title">Finance OS</h1>
-      <p class="subtitle">Your Teller-connected ledger with rule-based categorization and visual insight. Tune the window, ingest on-demand, and start shaping the rules that matter.</p>
+  <header class="wrap">
+    <div class="hero">
+      <div>
+        <h1 class="title">Finance OS</h1>
+        <p class="subtitle">High-signal dashboards for your Teller ledger. Use rules or AI to classify, then scan spend patterns without the noise of internal transfers.</p>
+      </div>
+      <div class="button-row">
+        <button id="refreshBtn" class="btn primary">Refresh</button>
+        <button id="ingestBtn" class="btn secondary">Ingest now</button>
+      </div>
     </div>
     <section class="status-grid" id="statusCards"></section>
   </header>
 
   <main class="wrap">
-    <section class="panel controls">
-      <div class="control-grid">
-        <sl-select label="Account" id="accountSelect"></sl-select>
-        <sl-input label="Start date" id="startDate" type="date"></sl-input>
-        <sl-input label="End date" id="endDate" type="date"></sl-input>
-        <sl-input label="Limit" id="limit" type="number" value="200"></sl-input>
+    <section class="panel toolbar">
+      <div class="toolbar-grid">
+        <div class="field">
+          <label for="accountSelect">Account</label>
+          <select id="accountSelect"></select>
+        </div>
+        <div class="field">
+          <label for="startDate">Start date</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="endDate">End date</label>
+          <input id="endDate" type="date" />
+        </div>
+        <div class="field">
+          <label for="limit">Limit</label>
+          <input id="limit" type="number" min="1" max="10000" value="200" />
+        </div>
       </div>
-      <div class="control-actions">
-        <sl-button id="refreshBtn" variant="primary">Refresh</sl-button>
-        <sl-button id="ingestBtn" variant="neutral">Ingest now</sl-button>
-        <sl-button id="applyRulesBtn" variant="warning">Apply rules</sl-button>
+      <div class="toolbar-actions">
+        <div class="button-row">
+          <button id="yearBtn" class="chip">Year</button>
+          <button id="monthBtn" class="chip">Month</button>
+        </div>
+        <div class="button-row">
+          <button id="applyRulesBtn" class="btn outline">Apply rules</button>
+          <button id="llmBtn" class="btn accent">AI categorize</button>
+        </div>
       </div>
       <div class="status-line" id="statusLine">Loading...</div>
     </section>
 
-    <section class="insights-grid">
-      <div class="panel span-6">
+    <section class="totals-grid" id="totalsCards"></section>
+
+    <section class="grid">
+      <div class="panel span-7">
         <div class="panel-header">
           <p class="panel-title">Daily Spend Calendar</p>
         </div>
         <div id="calendarChart" class="chart"></div>
       </div>
-      <div class="panel span-6">
+      <div class="panel span-5">
         <div class="panel-header">
           <p class="panel-title">Cashflow Sankey</p>
         </div>
@@ -361,27 +529,27 @@
       <div class="panel span-6">
         <div class="panel-header">
           <p class="panel-title">Rules</p>
-          <sl-button id="reloadRulesBtn" size="small" variant="neutral">Reload</sl-button>
+          <button id="reloadRulesBtn" class="btn outline">Reload</button>
         </div>
         <div class="rules-list" id="rulesList"></div>
-        <div class="control-grid">
-          <sl-input label="Pattern" id="rulePattern" placeholder="amazon, NETFLIX, .*UBER.*"></sl-input>
-          <sl-select label="Match" id="ruleMatch">
-            <sl-option value="contains">Contains</sl-option>
-            <sl-option value="regex">Regex</sl-option>
-          </sl-select>
-          <sl-input label="Category" id="ruleCategory" placeholder="dining"></sl-input>
-          <sl-input label="Merchant override" id="ruleMerchant" placeholder="Starbucks"></sl-input>
-          <sl-input label="Priority" id="rulePriority" type="number" value="100"></sl-input>
+        <div class="rules-grid">
+          <input id="rulePattern" placeholder="amazon, NETFLIX, .*UBER.*" />
+          <select id="ruleMatch">
+            <option value="contains">Contains</option>
+            <option value="regex">Regex</option>
+          </select>
+          <input id="ruleCategory" placeholder="dining" />
+          <input id="ruleMerchant" placeholder="Merchant override" />
+          <input id="rulePriority" type="number" value="100" />
         </div>
-        <div class="control-actions" style="margin-top: 10px;">
-          <sl-checkbox id="ruleApply" checked>Apply to current window</sl-checkbox>
-          <sl-button id="saveRuleBtn" variant="primary">Save rule</sl-button>
+        <div class="rules-actions">
+          <label><input id="ruleApply" type="checkbox" checked /> Apply to current window</label>
+          <button id="saveRuleBtn" class="btn primary">Save rule</button>
         </div>
       </div>
     </section>
 
-    <section class="panel transactions">
+    <section class="panel transactions span-12">
       <div class="panel-header">
         <p class="panel-title">Transactions</p>
       </div>
@@ -397,8 +565,12 @@
     const refreshBtn = document.getElementById('refreshBtn');
     const ingestBtn = document.getElementById('ingestBtn');
     const applyRulesBtn = document.getElementById('applyRulesBtn');
+    const llmBtn = document.getElementById('llmBtn');
+    const yearBtn = document.getElementById('yearBtn');
+    const monthBtn = document.getElementById('monthBtn');
     const statusLine = document.getElementById('statusLine');
     const statusCards = document.getElementById('statusCards');
+    const totalsCards = document.getElementById('totalsCards');
     const tableWrap = document.getElementById('tableWrap');
     const topMerchants = document.getElementById('topMerchants');
     const microStats = document.getElementById('microStats');
@@ -423,7 +595,7 @@
 
     function setStatus(message, kind) {
       statusLine.textContent = message;
-      statusLine.style.color = kind === 'error' ? '#b6462c' : '';
+      statusLine.style.color = kind === 'error' ? '#d14a36' : '';
     }
 
     function ensureChart(id) {
@@ -431,6 +603,35 @@
         charts[id] = echarts.init(document.getElementById(id));
       }
       return charts[id];
+    }
+
+    function toDateInputValue(date) {
+      return date.toISOString().slice(0, 10);
+    }
+
+    function setRange(start, end) {
+      startDateInput.value = toDateInputValue(start);
+      endDateInput.value = toDateInputValue(end);
+    }
+
+    function activateRange(button) {
+      [yearBtn, monthBtn].forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+    }
+
+    function setDefaultRange() {
+      const now = new Date();
+      const start = new Date(now);
+      start.setFullYear(start.getFullYear() - 1);
+      setRange(start, now);
+      activateRange(yearBtn);
+    }
+
+    function setMonthRange() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      setRange(start, now);
+      activateRange(monthBtn);
     }
 
     async function loadStatus() {
@@ -454,17 +655,16 @@
       const res = await fetch('/accounts');
       const data = await res.json();
       accountSelect.innerHTML = '';
-      const allOption = document.createElement('sl-option');
+      const allOption = document.createElement('option');
       allOption.value = '';
       allOption.textContent = 'All accounts';
       accountSelect.appendChild(allOption);
       data.accounts.forEach(account => {
-        const option = document.createElement('sl-option');
+        const option = document.createElement('option');
         option.value = account.account_id;
         option.textContent = `${account.name} (${account.subtype || account.type})`;
         accountSelect.appendChild(option);
       });
-      accountSelect.value = '';
     }
 
     function buildQueryParams() {
@@ -502,7 +702,7 @@
             <td data-label="Merchant">${merchant} <button class="mini-btn" data-merchant="${merchant}">Rule</button></td>
             <td data-label="Account">${accountLabel}</td>
             <td data-label="Category">${item.category || ''}</td>
-            <td data-label="Status">${item.pending ? 'Pending' : 'Posted'}</td>
+            <td data-label="Status">${item.pending ? '<span class="pill">Pending</span>' : 'Posted'}</td>
             <td data-label="Amount" class="amount ${amountClass}">${formatMoney(displayAmount)}</td>
           </tr>
         `;
@@ -533,11 +733,26 @@
     }
 
     function renderInsights(data) {
+      renderTotals(data.totals || {});
       renderCalendar(data);
       renderSankey(data);
       renderTreemap(data);
       renderMicro(data);
       renderTopMerchants(data.top_merchants || []);
+    }
+
+    function renderTotals(totals) {
+      const cards = [
+        { title: 'Income', value: formatMoney(totals.income || 0) },
+        { title: 'Spend', value: formatMoney(totals.spend || 0) },
+        { title: 'Net', value: formatMoney(totals.net || 0) },
+      ];
+      totalsCards.innerHTML = cards.map(card => `
+        <div class="stat-card">
+          <h3>${card.title}</h3>
+          <div class="value">${card.value}</div>
+        </div>
+      `).join('');
     }
 
     function renderCalendar(data) {
@@ -550,7 +765,7 @@
         calendar: {
           range: [data.range.start_date, data.range.end_date],
           cellSize: ['auto', 16],
-          itemStyle: { borderWidth: 0.5, borderColor: '#e4ded6' },
+          itemStyle: { borderWidth: 0.5, borderColor: '#e2e8f0' },
           yearLabel: { show: false }
         },
         series: {
@@ -584,7 +799,7 @@
           data: data.treemap,
           leafDepth: 1,
           label: { show: true, formatter: '{b}' },
-          itemStyle: { borderColor: '#f1ebe4' }
+          itemStyle: { borderColor: '#f1f5f9' }
         }]
       });
     }
@@ -599,7 +814,7 @@
         series: [{
           type: 'bar',
           data: [micro.lt_10?.share_count || 0, micro.lt_20?.share_count || 0],
-          itemStyle: { color: '#c45d3c' },
+          itemStyle: { color: '#ff7a59' },
           barWidth: 18
         }]
       });
@@ -662,7 +877,7 @@
     }
 
     async function applyRules() {
-      const payload = {};
+      const payload = { mode: 'rules' };
       if (accountSelect.value) payload.account_id = accountSelect.value;
       if (startDateInput.value) payload.start_date = startDateInput.value;
       if (endDateInput.value) payload.end_date = endDateInput.value;
@@ -678,6 +893,31 @@
         return;
       }
       setStatus(`Rules applied to ${data.updated} transactions.`);
+      await loadTransactions();
+      await loadInsights();
+    }
+
+    async function applyLlm() {
+      const payload = { mode: 'llm' };
+      if (accountSelect.value) payload.account_id = accountSelect.value;
+      if (startDateInput.value) payload.start_date = startDateInput.value;
+      if (endDateInput.value) payload.end_date = endDateInput.value;
+      if (limitInput.value) payload.limit = limitInput.value;
+      setStatus('Running AI categorization...');
+      const res = await fetch('/categorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus(`AI categorize failed: ${data.error}`, 'error');
+        return;
+      }
+      const batches = data.llm?.batches ?? 0;
+      const errors = data.llm?.errors ?? 0;
+      const errorNote = errors ? ` (${errors} batch errors)` : '';
+      setStatus(`AI categorized ${data.updated} transactions across ${batches} batches${errorNote}.`);
       await loadTransactions();
       await loadInsights();
     }
@@ -709,8 +949,19 @@
     });
     ingestBtn.addEventListener('click', triggerIngest);
     applyRulesBtn.addEventListener('click', applyRules);
+    llmBtn.addEventListener('click', applyLlm);
     reloadRulesBtn.addEventListener('click', loadRules);
     saveRuleBtn.addEventListener('click', saveRule);
+    yearBtn.addEventListener('click', async () => {
+      setDefaultRange();
+      await loadTransactions();
+      await loadInsights();
+    });
+    monthBtn.addEventListener('click', async () => {
+      setMonthRange();
+      await loadTransactions();
+      await loadInsights();
+    });
 
     tableWrap.addEventListener('click', event => {
       const button = event.target.closest('.mini-btn');
@@ -727,6 +978,7 @@
     });
 
     async function boot() {
+      setDefaultRange();
       await loadStatus();
       await loadAccounts();
       await loadRules();

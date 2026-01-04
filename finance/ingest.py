@@ -183,6 +183,9 @@ def _normalize_transaction(tx: dict, account: dict) -> dict:
         "pending_transaction_id": None,
         "category_id": None,
         "category": details.get("category"),
+        "category_source": "teller" if details.get("category") else None,
+        "category_confidence": None,
+        "flow_type": None,
     }
 
 

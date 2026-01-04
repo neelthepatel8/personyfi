@@ -7,6 +7,9 @@ This repo has a minimal CLI, SQLite schema, and Teller smoke script.
 - Copy `.env.example` to `.env` and fill in Teller credentials.
 - Install dependencies: `pip install -r requirements.txt`.
 - Defaults are tuned for a 24x7 loop: ingest every 10 minutes over a 10-day window.
+- LLM categorization is opt-in. Set `FINANCE_LLM_ENABLED=true` and `OPENAI_API_KEY` to enable (this will send transaction data to OpenAI).
+- Prompt and taxonomy are in `finance/llm.py` (`LLM_SYSTEM_PROMPT`, `LLM_CATEGORY_TAXONOMY`).
+- Batch size is controlled by `FINANCE_LLM_MAX_BATCH`.
 
 ## Commands
 
@@ -26,6 +29,7 @@ This repo has a minimal CLI, SQLite schema, and Teller smoke script.
   - Runs a local HTTP API and a scheduled ingest loop (default every 10 minutes).
   - Configure via `FINANCE_API_HOST`, `FINANCE_API_PORT`, `FINANCE_INGEST_INTERVAL_MINUTES`, `FINANCE_INGEST_LOOKBACK_DAYS`, `FINANCE_INGEST_PAGE_SIZE`.
   - UI is available at `http://127.0.0.1:3030/` (charts, rules, and transactions).
+  - UI defaults to a 12-month window; use the Month button to switch to the current month.
 
 ## Smoke
 
@@ -44,4 +48,5 @@ This repo has a minimal CLI, SQLite schema, and Teller smoke script.
 - `GET /rules`
 - `POST /ingest` (JSON body: `account_id`, `start_date`, `end_date`, `lookback_days`, `page_size`, `full`)
 - `POST /rules` (JSON body: `pattern`, `match_type`, `category`, `merchant`, `priority`)
-- `POST /categorize` (JSON body: `account_id`, `start_date`, `end_date`, `lookback_days`, `full`)
+- `POST /categorize` (JSON body: `account_id`, `start_date`, `end_date`, `lookback_days`, `full`, `mode`, `limit`)
+  - `mode=rules` (default) or `mode=llm` for LLM-driven categorization.

@@ -35,6 +35,7 @@ def build_insights(
         SELECT t.amount,
                t.date,
                t.category,
+               t.flow_type,
                t.merchant_name,
                t.name,
                a.type AS account_type
@@ -75,7 +76,12 @@ def build_insights(
 
     for row in rows:
         amount = float(row["amount"] or 0.0)
-        outflow, inflow = _split_flow(amount, row["account_type"])
+        outflow, inflow = _split_flow(
+            amount,
+            row["account_type"],
+            row["flow_type"],
+            row["category"],
+        )
         if inflow > 0:
             income_total += inflow
         if outflow <= 0:
@@ -140,7 +146,22 @@ def build_insights(
     }
 
 
-def _split_flow(amount: float, account_type: str | None) -> tuple[float, float]:
+def _split_flow(
+    amount: float,
+    account_type: str | None,
+    flow_type: str | None,
+    category: str | None,
+) -> tuple[float, float]:
+    normalized_flow = (flow_type or "").lower()
+    if not normalized_flow and category and "transfer" in category.lower():
+        return 0.0, 0.0
+    if normalized_flow == "transfer":
+        return 0.0, 0.0
+    if normalized_flow == "income":
+        return 0.0, abs(amount)
+    if normalized_flow == "expense":
+        return abs(amount), 0.0
+
     # Credit accounts report charges as positive and payments as negative, so invert inflow/outflow.
     is_credit = (account_type or "").lower() == "credit"
     if is_credit:

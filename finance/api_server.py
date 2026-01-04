@@ -12,6 +12,7 @@ from .config import Config
 from .ingest import ingest_all, ingest_one_account
 from .inbox import load_unknown_merchants
 from .insights import build_insights
+from .llm import categorize_with_llm, LlmError
 from . import rules as rules_engine
 
 logger = logging.getLogger(__name__)
@@ -176,6 +177,12 @@ def serve_api(
     bind_host = host or config.api_host
     bind_port = port or config.api_port
 
+    conn = db.connect(config.db_path)
+    try:
+        db.init_db(conn)
+    finally:
+        conn.close()
+
     if schedule:
         thread = threading.Thread(
             target=_schedule_loop,
@@ -295,7 +302,7 @@ def _list_transactions(config: Config, query: dict) -> dict:
     account_id = _get_query_value(query, "account_id")
     start_date = _get_query_value(query, "start_date")
     end_date = _get_query_value(query, "end_date")
-    limit = _parse_int(query.get("limit", ["200"])[0], 200, 1000)
+    limit = _parse_int(query.get("limit", ["200"])[0], 200, 10000)
     offset = _parse_int(query.get("offset", ["0"])[0], 0, 1000000)
 
     sql = [
@@ -469,6 +476,10 @@ def _categorize(config: Config, payload: dict) -> dict:
     if lookback_days is not None:
         lookback_days = _parse_int(str(lookback_days), config.ingest_lookback_days, 3650)
     full = bool(payload.get("full"))
+    mode = (payload.get("mode") or "rules").strip().lower()
+    limit = payload.get("limit")
+    if limit is not None:
+        limit = _parse_int(str(limit), 0, 10000)
 
     if not full:
         if not start_date and not end_date:
@@ -483,15 +494,31 @@ def _categorize(config: Config, payload: dict) -> dict:
         _validate_date(end_date)
 
     conn = db.connect(config.db_path)
+    llm_result: dict | None = None
     try:
-        rules = rules_engine.list_rules(conn)
-        updated = rules_engine.apply_rules_to_transactions(
-            conn,
-            rules,
-            account_id=account_id,
-            start_date=start_date,
-            end_date=end_date,
-        )
+        if mode == "rules":
+            rules = rules_engine.list_rules(conn)
+            updated = rules_engine.apply_rules_to_transactions(
+                conn,
+                rules,
+                account_id=account_id,
+                start_date=start_date,
+                end_date=end_date,
+            )
+        elif mode == "llm":
+            llm_result = categorize_with_llm(
+                conn,
+                config,
+                account_id=account_id,
+                start_date=start_date,
+                end_date=end_date,
+                limit=limit,
+            )
+            updated = llm_result["updated"]
+        else:
+            raise ValueError("mode must be rules or llm")
+    except LlmError as exc:
+        raise ValueError(str(exc)) from exc
     finally:
         conn.close()
 
@@ -499,6 +526,9 @@ def _categorize(config: Config, payload: dict) -> dict:
         "updated": updated,
         "start_date": start_date,
         "end_date": end_date,
+        "mode": mode,
+        "limit": limit,
+        "llm": llm_result,
     }
 
 

@@ -124,13 +124,16 @@ def apply_rules_to_transactions(
         conn.execute(
             """
             UPDATE transactions
-            SET category = ?, category_id = ?, merchant_name = COALESCE(?, merchant_name), updated_at = ?
+            SET category = ?, category_id = ?, merchant_name = COALESCE(?, merchant_name),
+                category_source = ?, category_confidence = ?, updated_at = ?
             WHERE transaction_id = ?
             """,
             (
                 rule_match.category,
                 str(rule_match.rule_id),
                 rule_match.merchant,
+                "rule",
+                1.0,
                 now,
                 row["transaction_id"],
             ),
@@ -172,13 +175,16 @@ def apply_rules_to_transaction_ids(
             conn.execute(
                 """
                 UPDATE transactions
-                SET category = ?, category_id = ?, merchant_name = COALESCE(?, merchant_name), updated_at = ?
+                SET category = ?, category_id = ?, merchant_name = COALESCE(?, merchant_name),
+                    category_source = ?, category_confidence = ?, updated_at = ?
                 WHERE transaction_id = ?
                 """,
                 (
                     rule_match.category,
                     str(rule_match.rule_id),
                     rule_match.merchant,
+                    "rule",
+                    1.0,
                     now,
                     row["transaction_id"],
                 ),
