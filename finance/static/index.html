@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Finance OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Context7 (shoelace-style/shoelace): CDN autoloader usage.
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+
+  <!-- Context7 (apache/echarts-doc): include echarts.min.js and init with echarts.init(...);
+  calendar heatmap uses calendar + heatmap series with coordinateSystem: 'calendar'.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f7f1ea;
+      --bg-2: #eef4f1;
+      --ink: #1a1917;
+      --muted: #6a645c;
+      --accent: #1f5d50;
+      --accent-2: #c45d3c;
+      --accent-3: #e0b247;
+      --card: #ffffff;
+      --border: rgba(27, 25, 23, 0.12);
+      --shadow: 0 14px 30px rgba(25, 18, 8, 0.1);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Sora", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top left, #f6dfc4 0%, transparent 35%),
+        radial-gradient(circle at 80% 0%, #d7e6dc 0%, transparent 40%),
+        linear-gradient(135deg, var(--bg), var(--bg-2));
+    }
+
+    header {
+      padding: 48px 20px 24px;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .title {
+      font-family: "Fraunces", serif;
+      font-size: 36px;
+      margin: 0;
+      letter-spacing: 0.4px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card h3 {
+      margin: 0 0 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .stat-card .value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .control-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
+
+    .chart {
+      width: 100%;
+      height: 320px;
+    }
+
+    .chart.tall { height: 380px; }
+
+    .micro-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .micro-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f4efe8;
+      border: 1px solid rgba(28, 24, 18, 0.08);
+      font-size: 14px;
+    }
+
+    .merchants-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .merchants-list li {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(27, 25, 23, 0.1);
+    }
+
+    .rules-list {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .rule-pill {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f0f5f2;
+      color: var(--accent);
+      border: 1px solid rgba(31, 93, 80, 0.2);
+      font-size: 12px;
+      letter-spacing: 0.4px;
+    }
+
+    .transactions {
+      margin-top: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+      text-align: left;
+    }
+
+    th {
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #f4efe8;
+    }
+
+    td.amount {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .amount.negative { color: #b6462c; }
+    .amount.positive { color: #1f5d50; }
+
+    .mini-btn {
+      border: none;
+      background: transparent;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    sl-button::part(base) {
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    sl-input::part(base),
+    sl-select::part(base) {
+      border-radius: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .span-4, .span-6, .span-8 { grid-column: span 12; }
+      .chart, .chart.tall { height: 300px; }
+    }
+
+    @media (max-width: 700px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead { display: none; }
+      tr {
+        border-bottom: 1px solid var(--border);
+        padding: 12px 0;
+      }
+      td {
+        border: none;
+        padding: 6px 0;
+      }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 0.6px;
+      }
+      td.amount { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap hero">
+    <div>
+      <h1 class="title">Finance OS</h1>
+      <p class="subtitle">Your Teller-connected ledger with rule-based categorization and visual insight. Tune the window, ingest on-demand, and start shaping the rules that matter.</p>
+    </div>
+    <section class="status-grid" id="statusCards"></section>
+  </header>
+
+  <main class="wrap">
+    <section class="panel controls">
+      <div class="control-grid">
+        <sl-select label="Account" id="accountSelect"></sl-select>
+        <sl-input label="Start date" id="startDate" type="date"></sl-input>
+        <sl-input label="End date" id="endDate" type="date"></sl-input>
+        <sl-input label="Limit" id="limit" type="number" value="200"></sl-input>
+      </div>
+      <div class="control-actions">
+        <sl-button id="refreshBtn" variant="primary">Refresh</sl-button>
+        <sl-button id="ingestBtn" variant="neutral">Ingest now</sl-button>
+        <sl-button id="applyRulesBtn" variant="warning">Apply rules</sl-button>
+      </div>
+      <div class="status-line" id="statusLine">Loading...</div>
+    </section>
+
+    <section class="insights-grid">
+      <div class="panel span-6">
+        <div class="panel-header">
+          <p class="panel-title">Daily Spend Calendar</p>
+        </div>
+        <div id="calendarChart" class="chart"></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-header">
+          <p class="panel-title">Cashflow Sankey</p>
+        </div>
+        <div id="sankeyChart" class="chart"></div>
+      </div>
+      <div class="panel span-8">
+        <div class="panel-header">
+          <p class="panel-title">Category Treemap</p>
+        </div>
+        <div id="treemapChart" class="chart tall"></div>
+      </div>
+      <div class="panel span-4">
+        <div class="panel-header">
+          <p class="panel-title">Micro-spend Mix</p>
+        </div>
+        <div id="microChart" class="chart"></div>
+        <div class="micro-grid" id="microStats"></div>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-header">
+          <p class="panel-title">Top Merchants</p>
+        </div>
+        <ul class="merchants-list" id="topMerchants"></ul>
+      </div>
+      <div class="panel span-6">
+        <div class="panel-header">
+          <p class="panel-title">Rules</p>
+          <sl-button id="reloadRulesBtn" size="small" variant="neutral">Reload</sl-button>
+        </div>
+        <div class="rules-list" id="rulesList"></div>
+        <div class="control-grid">
+          <sl-input label="Pattern" id="rulePattern" placeholder="amazon, NETFLIX, .*UBER.*"></sl-input>
+          <sl-select label="Match" id="ruleMatch">
+            <sl-option value="contains">Contains</sl-option>
+            <sl-option value="regex">Regex</sl-option>
+          </sl-select>
+          <sl-input label="Category" id="ruleCategory" placeholder="dining"></sl-input>
+          <sl-input label="Merchant override" id="ruleMerchant" placeholder="Starbucks"></sl-input>
+          <sl-input label="Priority" id="rulePriority" type="number" value="100"></sl-input>
+        </div>
+        <div class="control-actions" style="margin-top: 10px;">
+          <sl-checkbox id="ruleApply" checked>Apply to current window</sl-checkbox>
+          <sl-button id="saveRuleBtn" variant="primary">Save rule</sl-button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel transactions">
+      <div class="panel-header">
+        <p class="panel-title">Transactions</p>
+      </div>
+      <div id="tableWrap"></div>
+    </section>
+  </main>
+
+  <script>
+    const accountSelect = document.getElementById('accountSelect');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const limitInput = document.getElementById('limit');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const ingestBtn = document.getElementById('ingestBtn');
+    const applyRulesBtn = document.getElementById('applyRulesBtn');
+    const statusLine = document.getElementById('statusLine');
+    const statusCards = document.getElementById('statusCards');
+    const tableWrap = document.getElementById('tableWrap');
+    const topMerchants = document.getElementById('topMerchants');
+    const microStats = document.getElementById('microStats');
+    const rulesList = document.getElementById('rulesList');
+    const reloadRulesBtn = document.getElementById('reloadRulesBtn');
+    const rulePattern = document.getElementById('rulePattern');
+    const ruleMatch = document.getElementById('ruleMatch');
+    const ruleCategory = document.getElementById('ruleCategory');
+    const ruleMerchant = document.getElementById('ruleMerchant');
+    const rulePriority = document.getElementById('rulePriority');
+    const ruleApply = document.getElementById('ruleApply');
+    const saveRuleBtn = document.getElementById('saveRuleBtn');
+
+    const charts = {};
+
+    function formatMoney(value) {
+      if (value === null || value === undefined) return '';
+      const number = Number(value);
+      if (Number.isNaN(number)) return value;
+      return number.toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+    }
+
+    function setStatus(message, kind) {
+      statusLine.textContent = message;
+      statusLine.style.color = kind === 'error' ? '#b6462c' : '';
+    }
+
+    function ensureChart(id) {
+      if (!charts[id]) {
+        charts[id] = echarts.init(document.getElementById(id));
+      }
+      return charts[id];
+    }
+
+    async function loadStatus() {
+      const res = await fetch('/status');
+      const data = await res.json();
+      statusCards.innerHTML = '';
+      const cards = [
+        { title: 'Last ingest', value: data.last_ingest_at || 'n/a' },
+        { title: 'Last error', value: data.last_ingest_error || 'none' },
+        { title: 'Accounts', value: data.accounts.length },
+      ];
+      cards.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'stat-card';
+        el.innerHTML = `<h3>${card.title}</h3><div class="value">${card.value}</div>`;
+        statusCards.appendChild(el);
+      });
+    }
+
+    async function loadAccounts() {
+      const res = await fetch('/accounts');
+      const data = await res.json();
+      accountSelect.innerHTML = '';
+      const allOption = document.createElement('sl-option');
+      allOption.value = '';
+      allOption.textContent = 'All accounts';
+      accountSelect.appendChild(allOption);
+      data.accounts.forEach(account => {
+        const option = document.createElement('sl-option');
+        option.value = account.account_id;
+        option.textContent = `${account.name} (${account.subtype || account.type})`;
+        accountSelect.appendChild(option);
+      });
+      accountSelect.value = '';
+    }
+
+    function buildQueryParams() {
+      const params = new URLSearchParams();
+      if (accountSelect.value) params.set('account_id', accountSelect.value);
+      if (startDateInput.value) params.set('start_date', startDateInput.value);
+      if (endDateInput.value) params.set('end_date', endDateInput.value);
+      return params;
+    }
+
+    async function loadTransactions() {
+      const params = buildQueryParams();
+      if (limitInput.value) params.set('limit', limitInput.value);
+      setStatus('Loading transactions...');
+      const res = await fetch(`/transactions?${params.toString()}`);
+      const data = await res.json();
+      renderTable(data.items || []);
+      setStatus(`Showing ${data.items.length} of ${data.total} transactions`);
+    }
+
+    function renderTable(items) {
+      if (!items.length) {
+        tableWrap.innerHTML = '<div class="status-line">No transactions found.</div>';
+        return;
+      }
+      const rows = items.map(item => {
+        const merchant = item.merchant_name || item.name || '';
+        const isCredit = (item.account_type || '').toLowerCase() === 'credit';
+        const displayAmount = isCredit ? -item.amount : item.amount;
+        const amountClass = displayAmount < 0 ? 'negative' : 'positive';
+        const accountLabel = item.account_name || item.account_id;
+        return `
+          <tr>
+            <td data-label="Date">${item.date || ''}</td>
+            <td data-label="Merchant">${merchant} <button class="mini-btn" data-merchant="${merchant}">Rule</button></td>
+            <td data-label="Account">${accountLabel}</td>
+            <td data-label="Category">${item.category || ''}</td>
+            <td data-label="Status">${item.pending ? 'Pending' : 'Posted'}</td>
+            <td data-label="Amount" class="amount ${amountClass}">${formatMoney(displayAmount)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      tableWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Merchant</th>
+              <th>Account</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    async function loadInsights() {
+      const params = buildQueryParams();
+      const res = await fetch(`/insights?${params.toString()}`);
+      const data = await res.json();
+      renderInsights(data);
+    }
+
+    function renderInsights(data) {
+      renderCalendar(data);
+      renderSankey(data);
+      renderTreemap(data);
+      renderMicro(data);
+      renderTopMerchants(data.top_merchants || []);
+    }
+
+    function renderCalendar(data) {
+      const calendarChart = ensureChart('calendarChart');
+      const seriesData = (data.daily_spend || []).map(entry => [entry.date, entry.amount]);
+      const maxValue = Math.max(1, ...seriesData.map(entry => entry[1] || 0));
+      calendarChart.setOption({
+        tooltip: { formatter: params => `${params.value[0]}<br/>${formatMoney(params.value[1])}` },
+        visualMap: { min: 0, max: maxValue, show: false },
+        calendar: {
+          range: [data.range.start_date, data.range.end_date],
+          cellSize: ['auto', 16],
+          itemStyle: { borderWidth: 0.5, borderColor: '#e4ded6' },
+          yearLabel: { show: false }
+        },
+        series: {
+          type: 'heatmap',
+          coordinateSystem: 'calendar',
+          data: seriesData
+        }
+      });
+    }
+
+    function renderSankey(data) {
+      const sankeyChart = ensureChart('sankeyChart');
+      sankeyChart.setOption({
+        tooltip: { trigger: 'item', triggerOn: 'mousemove' },
+        series: [{
+          type: 'sankey',
+          data: data.sankey.nodes,
+          links: data.sankey.links,
+          lineStyle: { color: 'source', curveness: 0.5 },
+          emphasis: { focus: 'adjacency' }
+        }]
+      });
+    }
+
+    function renderTreemap(data) {
+      const treemapChart = ensureChart('treemapChart');
+      treemapChart.setOption({
+        tooltip: { formatter: params => `${params.name}<br/>${formatMoney(params.value || 0)}` },
+        series: [{
+          type: 'treemap',
+          data: data.treemap,
+          leafDepth: 1,
+          label: { show: true, formatter: '{b}' },
+          itemStyle: { borderColor: '#f1ebe4' }
+        }]
+      });
+    }
+
+    function renderMicro(data) {
+      const microChart = ensureChart('microChart');
+      const micro = data.micro_spend || {};
+      microChart.setOption({
+        grid: { left: 10, right: 10, top: 20, bottom: 20, containLabel: true },
+        xAxis: { type: 'value', axisLabel: { formatter: '{value}%' }, splitLine: { show: false } },
+        yAxis: { type: 'category', data: ['< $10', '< $20'], axisTick: { show: false } },
+        series: [{
+          type: 'bar',
+          data: [micro.lt_10?.share_count || 0, micro.lt_20?.share_count || 0],
+          itemStyle: { color: '#c45d3c' },
+          barWidth: 18
+        }]
+      });
+
+      microStats.innerHTML = `
+        <div class="micro-stat"><span>Total spend</span><span>${formatMoney(micro.total?.amount || 0)}</span></div>
+        <div class="micro-stat"><span>Transactions</span><span>${micro.total?.count || 0}</span></div>
+        <div class="micro-stat"><span>< $10 share</span><span>${micro.lt_10?.share_count || 0}%</span></div>
+        <div class="micro-stat"><span>< $20 share</span><span>${micro.lt_20?.share_count || 0}%</span></div>
+      `;
+    }
+
+    function renderTopMerchants(items) {
+      if (!items.length) {
+        topMerchants.innerHTML = '<li>No merchant data yet.</li>';
+        return;
+      }
+      topMerchants.innerHTML = items.map(entry => `
+        <li><span>${entry.name}</span><span>${formatMoney(entry.amount)}</span></li>
+      `).join('');
+    }
+
+    async function loadRules() {
+      const res = await fetch('/rules');
+      const data = await res.json();
+      const rules = data.rules || [];
+      if (!rules.length) {
+        rulesList.innerHTML = '<div class="status-line">No rules yet. Add your first one.</div>';
+        return;
+      }
+      rulesList.innerHTML = rules.map(rule => `
+        <div class="rule-pill">#${rule.id} ${rule.match_type} "${rule.pattern}" -> ${rule.category}</div>
+      `).join('');
+    }
+
+    async function saveRule() {
+      const payload = {
+        pattern: rulePattern.value,
+        match_type: ruleMatch.value,
+        category: ruleCategory.value,
+        merchant: ruleMerchant.value,
+        priority: rulePriority.value
+      };
+      setStatus('Saving rule...');
+      const res = await fetch('/rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus(`Rule save failed: ${data.error}`, 'error');
+        return;
+      }
+      await loadRules();
+      if (ruleApply.checked) {
+        await applyRules();
+      }
+      setStatus('Rule saved.');
+    }
+
+    async function applyRules() {
+      const payload = {};
+      if (accountSelect.value) payload.account_id = accountSelect.value;
+      if (startDateInput.value) payload.start_date = startDateInput.value;
+      if (endDateInput.value) payload.end_date = endDateInput.value;
+      setStatus('Applying rules...');
+      const res = await fetch('/categorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setStatus(`Categorize failed: ${data.error}`, 'error');
+        return;
+      }
+      setStatus(`Rules applied to ${data.updated} transactions.`);
+      await loadTransactions();
+      await loadInsights();
+    }
+
+    async function triggerIngest() {
+      setStatus('Triggering ingest...');
+      const payload = {};
+      if (accountSelect.value) payload.account_id = accountSelect.value;
+      if (startDateInput.value) payload.start_date = startDateInput.value;
+      if (endDateInput.value) payload.end_date = endDateInput.value;
+      const res = await fetch('/ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setStatus(`Ingest failed: ${data.error}`, 'error');
+        return;
+      }
+      await loadStatus();
+      await loadTransactions();
+      await loadInsights();
+    }
+
+    refreshBtn.addEventListener('click', async () => {
+      await loadTransactions();
+      await loadInsights();
+    });
+    ingestBtn.addEventListener('click', triggerIngest);
+    applyRulesBtn.addEventListener('click', applyRules);
+    reloadRulesBtn.addEventListener('click', loadRules);
+    saveRuleBtn.addEventListener('click', saveRule);
+
+    tableWrap.addEventListener('click', event => {
+      const button = event.target.closest('.mini-btn');
+      if (!button) return;
+      const merchant = button.getAttribute('data-merchant');
+      if (merchant) {
+        rulePattern.value = merchant;
+        ruleCategory.focus();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      Object.values(charts).forEach(chart => chart.resize());
+    });
+
+    async function boot() {
+      await loadStatus();
+      await loadAccounts();
+      await loadRules();
+      await loadTransactions();
+      await loadInsights();
+    }
+
+    boot();
+  </script>
+</body>
+</html>
