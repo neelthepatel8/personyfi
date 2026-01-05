@@ -39,6 +39,7 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           CERT: certs/certificate.pem
           CERT_KEY: certs/private_key.pem
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         working-directory: backend
         run: |
           python main.py

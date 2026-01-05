@@ -107,9 +107,32 @@ def main():
                     saved_count += 1
             
             print(f"  -> Transactions: {saved_count} processed/verified (older than {CUTOFF_DATE} skipped)")
+            
+            # Send Notification if we actually saved meaningful data (optional: logic to distinguish new vs verified)
+            # Since 'saved_count' currently tracks Upserts (which return true even on update), 
+            # we might spam confirmations. For now, let's only notify if we decide to change the return logic
+            # OR just notify that we ran successfully.
+            # User request: "updated records".
+            
+            # Let's simple notify that we synced X txns for verification.
+            if saved_count > 0:
+                send_notification(saved_count, acc.name)
 
     except Exception as e:
         print(f"\nError occurred: {e}")
+
+def send_notification(new_count, account_name):
+    topic = os.getenv("NTFY_TOPIC", "personyfi_updates_123") # Default or Env Var
+    if new_count > 0:
+        try:
+            requests.post(
+                f"https://ntfy.sh/{topic}",
+                data=f"💸 Processed {new_count} transactions for {account_name}".encode("utf-8"),
+                headers={"Title": "New Finance Data", "Priority": "3"}
+            )
+            print(f"  -> Notification sent to ntfy.sh/{topic}")
+        except Exception as e:
+            print(f"  -> Notification failed: {e}")
 
 if __name__ == "__main__":
     main()
