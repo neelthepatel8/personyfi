@@ -1,0 +1,19 @@
+--- Sync Started: Sun Jan  4 16:20:08 PST 2026 ---
+Initializing TellerClient with token: toke...
+Database Client Initialized.
+
+--- Fetching Accounts ---
+Found 3 accounts.
+Processing Account: Credit Card (Bank of America)
+  -> Saved to DB (ID: bankofamerica, Type: credit_card)
+  -> Fetching transactions for Credit Card...
+  -> Transactions: 397 saved, 439 skipped (older than 2025-07-01)
+Processing Account: Checking (Bank of America)
+  -> Saved to DB (ID: bankofamerica, Type: checking)
+  -> Fetching transactions for Checking...
+  -> Transactions: 455 saved, 545 skipped (older than 2025-07-01)
+Processing Account: Savings (Bank of America)
+  -> Saved to DB (ID: bankofamerica, Type: savings)
+  -> Fetching transactions for Savings...
+  -> Transactions: 191 saved, 268 skipped (older than 2025-07-01)
+--- Sync Success: Sun Jan  4 16:22:10 PST 2026 ---

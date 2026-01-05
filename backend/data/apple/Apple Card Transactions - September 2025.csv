@@ -1,0 +1,10 @@
+Transaction Date,Clearing Date,Description,Merchant,Category,Type,Amount (USD),Purchased By
+09/29/2025,09/30/2025,"PAYPAL *NETFLIX.COM 7700 EASTPORT PARKWAY 4029357733 95032 CA USA","Netflix","Utilities","Purchase","24.99","Neel Patel"
+09/26/2025,09/27/2025,"AMAZON GROCERY SUBSCRI410 TERRY AVENUE NORTH 888-280-4331 98109 WA USA","Amazon Grocery","Other","Purchase","9.99","Neel Patel"
+09/22/2025,09/22/2025,"ACH DEPOSIT INTERNET TRANSFER FROM ACCOUNT ENDING IN 1191","Ach Deposit Internet Transfer From Account Ending In 1191","Payment","Payment","-444.27","Neel Patel"
+09/15/2025,09/15/2025,"AMAZON MKTPL*LN7YY22F3440 TERRY AVE N AMZN.COM/BILL98109 WA USA","Amazon Mktpl*ln7yy22f3","Other","Purchase","14.18","Neel Patel"
+09/12/2025,09/13/2025,"LEMONADE INSURANCE 5 CROSBY ST INTERNET 10013 NY USA (RETURN)","Lemonade Insurance 5 Crosby St Internet 10013 Ny Usa (return)","Credit","Credit","-0.54","Neel Patel"
+09/12/2025,09/13/2025,"DAILY CASH ADJUSTMENT","Daily Cash Adjustment","Debit","Debit","0.01","Neel Patel"
+09/30/2025,09/30/2025,"MONTHLY INSTALLMENTS (3 OF 12)","Monthly Installments (3 Of 12)","Installment","Installment","35.75","Neel Patel"
+09/30/2025,09/30/2025,"MONTHLY INSTALLMENTS (4 OF 12)","Monthly Installments (4 Of 12)","Installment","Installment","10.75","Neel Patel"
+09/30/2025,09/30/2025,"MONTHLY INSTALLMENTS (4 OF 12)","Monthly Installments (4 Of 12)","Installment","Installment","83.25","Neel Patel"

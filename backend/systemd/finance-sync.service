@@ -1,0 +1,14 @@
+[Unit]
+Description=Finance Teller Sync Service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/neelpatel/Code/finance/backend/scripts/sync_teller.sh
+User=neelpatel
+WorkingDirectory=/home/neelpatel/Code/finance/backend
+StandardOutput=append:/home/neelpatel/Code/finance/backend/sync.log
+StandardError=append:/home/neelpatel/Code/finance/backend/sync.log
+
+[Install]
+WantedBy=default.target
