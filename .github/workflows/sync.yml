@@ -1,0 +1,44 @@
+name: Finance Data Sync
+
+on:
+  schedule:
+    # Run every 5 minutes (Note: GitHub Actions may delay this slightly)
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync-teller:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Setup Certs
+        run: |
+          mkdir -p backend/certs
+          echo "${{ secrets.TELLER_CERT }}" > backend/certs/certificate.pem
+          echo "${{ secrets.TELLER_KEY }}" > backend/certs/private_key.pem
+
+      - name: Run Sync
+        env:
+          TELLER_TOKEN: ${{ secrets.TELLER_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          CERT: backend/certs/certificate.pem
+          CERT_KEY: backend/certs/private_key.pem
+        working-directory: backend
+        run: |
+          python main.py
