@@ -37,8 +37,8 @@ jobs:
           TELLER_TOKEN: ${{ secrets.TELLER_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          CERT: backend/certs/certificate.pem
-          CERT_KEY: backend/certs/private_key.pem
+          CERT: certs/certificate.pem
+          CERT_KEY: certs/private_key.pem
         working-directory: backend
         run: |
           python main.py
