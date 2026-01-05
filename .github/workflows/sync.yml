@@ -3,7 +3,7 @@ name: Finance Data Sync
 on:
   schedule:
     # Run every 5 minutes (Note: GitHub Actions may delay this slightly)
-    - cron: '*/5 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:

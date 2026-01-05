@@ -106,7 +106,7 @@ def main():
                 if res_tx:
                     saved_count += 1
             
-            print(f"  -> Transactions: {saved_count} saved, {skipped_count} skipped (older than {CUTOFF_DATE})")
+            print(f"  -> Transactions: {saved_count} processed/verified (older than {CUTOFF_DATE} skipped)")
 
     except Exception as e:
         print(f"\nError occurred: {e}")
